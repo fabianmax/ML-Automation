@@ -51,7 +51,9 @@ class auto_ml:
                             "exclude_preprocessors": None,
                             "ml_memory_limit": 6156,
                             "resampling_strategy": "cv",
-                            "resampling_strategy_arguments": {"folds": folds}}
+                            "resampling_strategy_arguments": {"folds": folds},
+                            "tmp_folder": None,
+                            "output_folder": None}
 
             # Get relevant default arguments (not in **kwargs)
             not_in_kwargs = {key: value for (key, value) in default_args.items() if key not in kwargs.keys()}
@@ -68,7 +70,9 @@ class auto_ml:
                                                exclude_preprocessors=kwargs["exclude_preprocessors"],
                                                ml_memory_limit=kwargs["ml_memory_limit"],
                                                resampling_strategy=kwargs["resampling_strategy"],
-                                               resampling_strategy_arguments=kwargs["resampling_strategy_arguments"])
+                                               resampling_strategy_arguments=kwargs["resampling_strategy_arguments"],
+                                               tmp_folder=kwargs["tmp_folder"],
+                                               output_folder=kwargs["output_folder"])
 
         # TPOT
         # http://epistasislab.github.io/tpot/
@@ -89,9 +93,11 @@ class auto_ml:
                             "mutation_rate": 0.9,
                             "crossover_rate": 0.1,
                             "scoring": "neg_mean_squared_error",
+                            "max_eval_time_mins": 6,
                             "n_jobs": 1,
-                            "verbosity": 2,
-                            "config_dict": tpot_config}
+                            "verbosity": 0,
+                            "config_dict": tpot_config,
+                            "periodic_checkpoint_folder": None}
 
             # Get relevant default arguments (not in **kwargs)
             not_in_kwargs = {key: value for (key, value) in default_args.items() if key not in kwargs.keys()}
@@ -109,8 +115,10 @@ class auto_ml:
                                         cv=folds,
                                         n_jobs=kwargs["n_jobs"],
                                         max_time_mins=run_time,
+                                        max_eval_time_mins=kwargs["max_eval_time_mins"],
                                         verbosity=kwargs["verbosity"],
-                                        config_dict=kwargs["config_dict"])
+                                        config_dict=kwargs["config_dict"],
+                                        periodic_checkpoint_folder=kwargs["periodic_checkpoint_folder"])
 
         # H2O AutoML
         # http://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html

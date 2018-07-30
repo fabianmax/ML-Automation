@@ -95,9 +95,10 @@ class auto_ml:
                             "scoring": "neg_mean_squared_error",
                             "max_eval_time_mins": 6,
                             "n_jobs": 1,
-                            "verbosity": 0,
+                            "verbosity": 2,
                             "config_dict": tpot_config,
-                            "periodic_checkpoint_folder": None}
+                            "periodic_checkpoint_folder": None,
+                            "early_stop": 1000}
 
             # Get relevant default arguments (not in **kwargs)
             not_in_kwargs = {key: value for (key, value) in default_args.items() if key not in kwargs.keys()}
@@ -118,7 +119,8 @@ class auto_ml:
                                         max_eval_time_mins=kwargs["max_eval_time_mins"],
                                         verbosity=kwargs["verbosity"],
                                         config_dict=kwargs["config_dict"],
-                                        periodic_checkpoint_folder=kwargs["periodic_checkpoint_folder"])
+                                        periodic_checkpoint_folder=kwargs["periodic_checkpoint_folder"],
+                                        early_stop=kwargs["early_stop"])
 
         # H2O AutoML
         # http://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html
@@ -134,9 +136,9 @@ class auto_ml:
             kwargs.update(not_in_kwargs)
 
             # Start H2O cluster, and clear data and create AutoML object
-            h2o.init(max_mem_size="8G")
+            h2o.init(max_mem_size="8G", nthreads=1)
             h2o.remove_all()
-            self.ml_obj = H2OAutoML(max_runtime_secs=5 * run_time,
+            self.ml_obj = H2OAutoML(max_runtime_secs=60 * run_time,
                                     nfolds=folds,
                                     max_models=kwargs["max_models"])
 
@@ -163,8 +165,13 @@ class auto_ml:
 
         elif isinstance(self.ml_obj, h2o.automl.autoh2o.H2OAutoML):
 
+            # Convert to pandas
+            if not isinstance(X, pd.DataFrame):
+                X = pd.DataFrame(X)
+                X.columns = ["var_" + str(col) for col in X.columns.values]
+
             # Upload to h2o
-            df_train_h2o = h2o.H2OFrame(pd.concat([X, pd.DataFrame({"target": y})], axis=1))
+            df_train_h2o = h2o.H2OFrame(pd.concat([pd.DataFrame(X), pd.DataFrame({"target": y})], axis=1))
 
             # Feature and target names
             features = X.columns.values.tolist()
@@ -197,9 +204,18 @@ class auto_ml:
             return y_hat
 
         elif isinstance(self.ml_obj, h2o.automl.autoh2o.H2OAutoML):
+
+            # Convert to pandas
+            if not isinstance(X, pd.DataFrame):
+                X = pd.DataFrame(X)
+                X.columns = ["var_" + str(col) for col in X.columns.values]
+
+            # Predict and return from h2o cluster
             df_test_h2o = h2o.H2OFrame(X)
             df_test_hat = self.ml_obj.predict(df_test_h2o)
             y_hat = h2o.as_list(df_test_hat["predict"])
+
+            # dont forget to shutdown the cluster...
             h2o.cluster().shutdown()
 
             return y_hat

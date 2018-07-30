@@ -8,7 +8,7 @@ n_data_set <- 10
 for (i in seq(n_data_set)) {
   
   # Sim settings
-  n <- floor(runif(1, 500, 5000))
+  n <- floor(runif(1, 1000, 5000))
   n_num_vars <- c(sample(2:10, 1), sample(2:10, 1))
   n_cat_vars <- c(0, 0)
   n_noise_vars <- sample(1:5, 1)
@@ -19,12 +19,14 @@ for (i in seq(n_data_set)) {
             numvars = n_num_vars,
             catvars = n_cat_vars, 
             noisevars = n_noise_vars,   
-            nlfun = function(x) {x^inter_degree},  
-            interaction = 2,  
-            sig = c(1,4),   
-            cor = c(0.1, 0.3),  
-            weights = c(-5,5),  
-            noise.coll = FALSE)
+            task = Xy_task(),
+            nlfun = function(x) {x^2},
+            interactions = 1,
+            sig = c(1,4), 
+            cor = c(0),
+            weights = c(-10,10),
+            intercept = TRUE,
+            stn = 4)
   
   # Get data
   df <- sim$data
@@ -42,10 +44,11 @@ for (i in seq(n_data_set)) {
   df_train <- df[in_train, ]
   df_test <- df[-in_train, ]
   
-  # Export
+  # Path names
   path_train <- paste0("../data/Xy/", i, "_train.csv")
   path_test <- paste0("../data/Xy/", i, "_test.csv")
   
+  # Export
   fwrite(df_train, file = path_train)
   fwrite(df_test, file = path_test)
   

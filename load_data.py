@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def load_data(path_train, path_test):
 
     # Read data

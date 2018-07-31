@@ -4,7 +4,6 @@ import numpy as np
 
 from load_data import load_data
 from auto_ml import auto_ml
-from sim_data import sim_data
 
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
@@ -22,8 +21,8 @@ for sim in np.arange(1, 11):
 backends = ["sklearn", "h2o", "tpot"]
 
 # Settings
-runs = 2  # number of random data sets
-time_to_run = 5  # in minutes
+runs = 10  # number of random data sets
+time_to_run = 10  # in minutes
 folds = 5  # for cv
 
 # Result container
@@ -34,7 +33,6 @@ for run in np.arange(runs):
 
     # Load/Sim data
     X_train, y_train, X_test, y_test = load_data(path_train=files[run]["train"], path_test=files[run]["test"])
-    #X_train, y_train, X_test, y_test, params = sim_data()
 
     # Random Forest Benchmark
     print("Fitting Benchmark via Random Forest")

@@ -151,8 +151,8 @@ class auto_ml:
         """
         Fit method for specified backends
 
-        :param X_train: Training data
-        :param y_train: Training labels
+        :param X: Training data
+        :param y: Training labels
         :return:
         """
 

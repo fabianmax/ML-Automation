@@ -22,8 +22,8 @@ backends = ["sklearn", "h2o", "tpot"]
 
 # Settings
 runs = 10  # number of random data sets
-time_to_run = 10  # in minutes
-folds = 5  # for cv
+time_to_run = 5  # run time for each dataset and engine in minutes
+folds = 5  # number of folds used in cv
 
 # Result container
 results = []

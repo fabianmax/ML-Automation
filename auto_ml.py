@@ -153,7 +153,7 @@ class auto_ml:
 
         :param X: Training data
         :param y: Training labels
-        :return:
+        :return: None
         """
 
         if isinstance(self.ml_obj, autosklearn.estimators.AutoSklearnRegressor):

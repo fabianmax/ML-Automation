@@ -98,7 +98,7 @@ class auto_ml:
                             "verbosity": 2,
                             "config_dict": tpot_config,
                             "periodic_checkpoint_folder": None,
-                            "early_stop": 1000}
+                            "early_stop": 10000}
 
             # Get relevant default arguments (not in **kwargs)
             not_in_kwargs = {key: value for (key, value) in default_args.items() if key not in kwargs.keys()}

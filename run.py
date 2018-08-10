@@ -22,13 +22,11 @@ backends = ["sklearn", "h2o", "tpot"]
 
 # Settings
 runs = 10  # number of random data sets
-time_to_run = 5  # run time for each dataset and engine in minutes
+time_to_run = 60  # run time for each dataset and engine in minutes
 folds = 5  # number of folds used in cv
 
-# Result container
-results = []
-
 # Loop over datasets
+#for run in [8, 9, ]:
 for run in np.arange(runs):
 
     # Load/Sim data
@@ -74,7 +72,10 @@ for run in np.arange(runs):
                     "mse_test": mse_score,
                     "mse_benchmark": mse_benchmark,
                     "time_elapsed": time_elapsed}
-            results.append(info)
+
+            # Write log
+            with open("../results/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(run) + "_" + str(engine) + ".json", "w") as outfile:
+                json.dump(info, outfile, sort_keys=True, indent=4)
 
             # Verbose
             print("Finished " + engine + " in " + str(run) + " run")
@@ -82,11 +83,6 @@ for run in np.arange(runs):
         except (RuntimeError, TypeError, NameError):
             print("Error in " + "backend " + engine + " for " + str(run), "run")
 
-        # Write log
-        with open("../tmp/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(run) + ".json", "w") as outfile:
-            json.dump(results, outfile, sort_keys=True, indent=4)
 
-# Save dataset results to json
-with open("../models/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + ".json", "w") as outfile:
-    json.dump(results, outfile, sort_keys=True, indent=4)
+
 

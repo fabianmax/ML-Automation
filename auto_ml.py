@@ -153,15 +153,19 @@ class auto_ml:
 
         :param X: Training data
         :param y: Training labels
-        :return: None
+        :return: auto machine learning object
         """
 
         if isinstance(self.ml_obj, autosklearn.estimators.AutoSklearnRegressor):
             self.ml_obj.fit(X=X.copy(), y=y.copy(), metric=autosklearn.metrics.mean_squared_error)
             it_fits = self.ml_obj.refit(X=X.copy(), y=y.copy())
 
+            return self.ml_obj
+
         elif isinstance(self.ml_obj, tpot.tpot.TPOTRegressor):
             self.ml_obj.fit(features=X, target=y)
+
+            return self.ml_obj
 
         elif isinstance(self.ml_obj, h2o.automl.autoh2o.H2OAutoML):
 
@@ -181,6 +185,8 @@ class auto_ml:
             self.ml_obj.train(x=features,
                               y=target,
                               training_frame=df_train_h2o)
+
+            return self.ml_obj
 
         else:
             print("Unknown backend")

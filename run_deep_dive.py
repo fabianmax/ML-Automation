@@ -4,6 +4,7 @@ import h2o
 
 from load_data import load_data
 from auto_ml import auto_ml
+from write_read_pickle import MacOSFile, pickle_dump, pickle_load
 
 from sklearn.metrics import mean_squared_error
 
@@ -40,8 +41,8 @@ for engine in backends:
 
         # Save fitted model
         if engine == "sklearn":
-            with open("../models/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(1) + "_" + str(engine) + ".pickle", "wb") as file:
-                pickle.dump(mod_fitted, file, protocol=pickle.HIGHEST_PROTOCOL)
+            path = "../models/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(1) + "_" + str(engine) + ".pickle"
+            model_path = pickle_dump(mod_fitted, path)
 
         elif engine == "h2o":
             model_path = h2o.save_model(model=mod_fitted.leader, path="../models/", force=True)

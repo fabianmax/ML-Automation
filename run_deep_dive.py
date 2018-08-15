@@ -4,7 +4,7 @@ import h2o
 
 from load_data import load_data
 from auto_ml import auto_ml
-from write_read_pickle import MacOSFile, pickle_dump, pickle_load
+from write_read_pickle import MacOSFile, pickle_dump
 
 from sklearn.metrics import mean_squared_error
 
@@ -32,6 +32,10 @@ for engine in backends:
 
     try:
 
+        path_model = "../models/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(engine) + ".pickle"
+        path_pred = "../predictions/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(engine) + ".pickle"
+
+
         # Init model
         mod = auto_ml(backend=engine)
         mod.create_ml(run_time=time_to_run, folds=folds)
@@ -41,27 +45,20 @@ for engine in backends:
 
         # Save fitted model
         if engine == "sklearn":
-            path = "../models/" + time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime(time.time())) + "_" + str(1) + "_" + str(engine) + ".pickle"
-            model_path = pickle_dump(mod_fitted, path)
+            model_path = pickle_dump(mod_fitted, path_model)
 
         elif engine == "h2o":
             model_path = h2o.save_model(model=mod_fitted.leader, path="../models/", force=True)
 
         # Predict on test set
         y_hat = mod.predict(X=X_test)
+        pred_path = pickle_dump(y_hat, path_pred)
 
         # End time tracking
         time_elapsed = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
 
         # Eval error on test set
         mse_score = mean_squared_error(y_true=y_test, y_pred=y_hat)
-
-        # Results
-        info = {"run": int(1),
-                "backend": engine,
-                "mse_test": mse_score,
-                "time_elapsed": time_elapsed,
-                "y_hat": y_hat}
 
     except (RuntimeError, TypeError, NameError):
         print("Error")

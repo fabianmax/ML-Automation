@@ -1,8 +1,12 @@
 import json, os, fnmatch
+import h2o
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+from write_read_pickle import MacOSFile, pickle_load
+
 
 # Get files names of results
 files = fnmatch.filter(os.listdir('../results'), '*.json')
@@ -52,4 +56,29 @@ plot = plot.map_dataframe(plot_hline, y='mse_benchmark', z='simulation')
 plot = plot.set_titles("{col_name}")
 plot = plot.set_axis_labels("Algorithm", "Mean Squard Error")
 plt.show()
+
+
+
+
+
+
+
+
+
+
+
+# Load fitted autsklearn model
+mod_fitted_sklearn = pickle_load('../models/2018-08-13_21-13-32_sklearn.pickle')
+mod_fitted_sklearn.get_models_with_weights()
+mod_fitted_sklearn.show_models()
+
+
+# Load fitted h2o model
+h2o.init(max_mem_size="8G", nthreads=1)
+h2o.remove_all()
+mod_fitted_h2o = h2o.load_model('../models/StackedEnsemble_BestOfFamily_0_AutoML_20180814_024704')
+
+
+
+
 

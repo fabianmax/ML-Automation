@@ -1,34 +1,12 @@
 import pandas as pd
 
-from autosklearn.regression import AutoSklearnRegressor
-import autosklearn.metrics
-
-from tpot import TPOTRegressor
-
-import h2o
-from h2o.automl import H2OAutoML
-
-# Files
-files = [{"train": "../data/01_r_air_train.csv", "test": "../data/01_r_air_test.csv", "task": "regression"},
-         {"train": "../data/02_r_bike_train.csv", "test": "../data/02_r_bike_test.csv", "task": "regression"},
-         {"train": "../data/03_r_gas_train.csv", "test": "../data/03_r_gas_test.csv", "task": "regression"}]
-
-# Paths
-path_train = files[0]["train"]
-path_test = files[0]["test"]
-
 # Load data
-df_train = pd.read_csv(path_train)
-df_test = pd.read_csv(path_test)
+df_train = pd.read_csv("../data/Xy/1_train.csv")
+df_test = pd.read_csv("../data/Xy/1_test.csv")
 
 # Columns
 cols_train = df_train.columns.tolist()
 cols_test = df_test.columns.tolist()
-
-# Subset relevant columns in data
-use_this_cols = set(cols_train).intersection(cols_test)
-df_train = df_train.loc[:, use_this_cols]
-df_test = df_test.loc[:, use_this_cols]
 
 # Target and features
 y_train = df_train.loc[:, "label"]
@@ -40,9 +18,14 @@ X_test = df_test.drop("label", axis=1)
 
 # AUTO-SKLEARN
 
+from autosklearn.regression import AutoSklearnRegressor
+from autosklearn.metrics import mean_squared_error
+
+# Settings
 estimators_to_use = ["random_forest", "extra_trees", "gradient_boosting", "ridge_regression"]
 preprocessing_to_use = ["no_preprocessing"]
 
+# Init auto-sklearn
 auto_sklearn = AutoSklearnRegressor(time_left_for_this_task=60*5,
                                     per_run_time_limit=360,
                                     include_estimators=estimators_to_use,
@@ -53,17 +36,22 @@ auto_sklearn = AutoSklearnRegressor(time_left_for_this_task=60*5,
                                     resampling_strategy="cv",
                                     resampling_strategy_arguments={"folds": 5})
 
-auto_sklearn.fit(X=X_train.copy(), y=y_train.copy(), metric=autosklearn.metrics.mean_squared_error)
+# Train models
+auto_sklearn.fit(X=X_train.copy(), y=y_train.copy(), metric=mean_squared_error)
 it_fits = auto_sklearn.refit(X=X_train.copy(), y=y_train.copy())
 
+# Predict
 y_hat = auto_sklearn.predict(X_test)
 
+# Show results
 auto_sklearn.cv_results_
 auto_sklearn.sprint_statistics()
 auto_sklearn.show_models()
 auto_sklearn.get_models_with_weights()
 
 # TPOT
+
+from tpot import TPOTRegressor
 
 tpot_config = {
     "sklearn.linear_model.Ridge": {},
@@ -94,6 +82,10 @@ y_hat = auto_tpot.predict(features=X_test)
 
 # H2O AUTOML
 
+import h2o
+from h2o.automl import H2OAutoML
+
+# Shart h2o cluster
 h2o.init(max_mem_size="8G")
 
 # Upload to h2o
@@ -113,9 +105,10 @@ auto_h2o.train(x=features,
 auto_h2o.leaderboard
 auto_h2o = auto_h2o.leader
 
-# testing
+# Testing
 df_test_hat = auto_h2o.predict(df_test_h2o)
 y_hat = h2o.as_list(df_test_hat["predict"])
 
+# Close cluster
 h2o.cluster().shutdown()
 

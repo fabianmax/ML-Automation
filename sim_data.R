@@ -3,6 +3,7 @@ library(caret)
 library(dplyr)
 library(data.table)
 
+# Number of datasets
 n_data_set <- 10
 
 for (i in seq(n_data_set)) {
@@ -28,7 +29,7 @@ for (i in seq(n_data_set)) {
             intercept = TRUE,
             stn = 4)
   
-  # Get data
+  # Get data and DGP
   df <- sim$data
   dgp <- sim$dgp
   

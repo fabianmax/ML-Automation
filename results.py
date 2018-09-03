@@ -60,17 +60,29 @@ plot = plot.set_titles("{col_name}")
 plot = plot.set_axis_labels("Algorithm", "Mean Squard Error")
 plt.show()
 
+# Number of wins
+results_df_reduced_wide = results_df_reduced[['simulation', 'backend', 'mse_test']].pivot(index='simulation',
+                                                                                          columns='backend',
+                                                                                          values='mse_test')
 
+results_df_reduced_wide.loc[:, 'h2o_is_better'] = np.where(results_df_reduced_wide.h2o < results_df_reduced_wide.sklearn, 1, 0)
 
+# Number of times h2o is better
+sum(results_df_reduced_wide.h2o_is_better)
 
+# Average absolut percentage difference
+np.mean((results_df_reduced_wide.h2o - results_df_reduced_wide.sklearn) / results_df_reduced_wide.h2o)
 
+# Difference between AutoML
+results_h2o = results_df_reduced[results_df_reduced.backend == 'h2o']
+np.mean(abs(results_h2o.mse_benchmark - results_h2o.mse_test) / results_h2o.mse_benchmark)
 
-
+results_sklearn = results_df_reduced[results_df_reduced.backend == 'sklearn']
+np.mean(abs(results_sklearn.mse_benchmark - results_sklearn.mse_test) / results_sklearn.mse_benchmark)
 
 
 
 # DEEP DIVE
-
 
 # Load fitted autsklearn model
 mod_fitted_sklearn = pickle_load('../models/2018-08-13_21-13-32_sklearn.pickle')
